@@ -1,0 +1,27 @@
+{
+	"manifest_version": 3,
+<<<<<<< HEAD
+	"name": "Dark Buster",
+=======
+	"name": "dark_bust",
+>>>>>>> 0f9d3d2a75909a30ded99e326b5d0c214e5358ca
+	"version": "1.2",
+	"description": "Recognize dark patterns in online stores",
+	"action": {
+		"default_popup": "popup.html"
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["js/common.js", "js/block_segment.js", "js/content.js"],
+<<<<<<< HEAD
+			"css": ["css/darkPatterns.css"],
+=======
+			"css": ["css/dark_bust.css"],
+>>>>>>> 0f9d3d2a75909a30ded99e326b5d0c214e5358ca
+			"run_at": "document_end"
+		}
+	],
+	"permissions": ["activeTab", "tabs", "storage"],
+	"host_permissions": ["<all_urls>"]
+}

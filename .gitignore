@@ -1,0 +1,6 @@
+api/**/model
+api/**/__pycache__
+
+api/myvenv
+api/.venv
+api/__pycache__
