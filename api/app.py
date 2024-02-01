@@ -32,31 +32,6 @@ def classify():
         return jsonify({"error": str(e)}), 500
 
 
-# @app.route("/", methods=["POST"])
-# def detect_and_classify():
-#     try:
-#         texts = request.get_json()
-#         dp_detection_classifier = DPDetectionPipeline()
-#         dp_classifier = DPClassificationPipeline()
-
-#         predictions = []
-#         for text in texts:
-#             prediction = dp_detection_classifier.predict(text)
-#             if prediction == 0:
-#                 predictions.append(
-#                     {
-#                         "dp": 0,
-#                         "dp_class": "",
-#                     }
-#                 )
-#             else:
-#                 predictions.append({"dp": 1, "dp_class": dp_classifier.predict(text)})
-
-#         return jsonify(predictions)
-
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
 @app.route("/", methods=["POST"])
 def detect_and_classify():
     try:
@@ -75,7 +50,7 @@ def detect_and_classify():
                 )
             else:
                 predictions.append({"dp": 1, "dp_class": prediction})
-        
+
         return jsonify(predictions)
 
     except Exception as e:
