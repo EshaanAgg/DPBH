@@ -86,7 +86,6 @@ function highlight(element, type) {
 	let body = document.createElement("span");
 	body.classList.add("dark_bust-highlight-body");
 
-	/* header */
 	let header = document.createElement("div");
 	header.classList.add("modal-header");
 	let headerText = document.createElement("h1");
@@ -94,7 +93,6 @@ function highlight(element, type) {
 	header.appendChild(headerText);
 	body.appendChild(header);
 
-	/* content */
 	let content = document.createElement("div");
 	content.classList.add("modal-content");
 	content.innerHTML = descriptions[type];
