@@ -1,16 +1,8 @@
 window.onload = function () {
-	// Disable the loader by default
-	document.getElementsByClassName("loader").style.display = "none";
-
 	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
 		chrome.tabs.sendMessage(tabs[0].id, { message: "popup_open" });
+		chrome.tabs.sendMessage(tabs[0].id, { message: "analyze_site" });
 	});
-
-	document.getElementsByClassName("analyze-button")[0].onclick = function () {
-		chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-			chrome.tabs.sendMessage(tabs[0].id, { message: "analyze_site" });
-		});
-	};
 
 	document.getElementsByClassName("link")[0].onclick = function () {
 		chrome.tabs.create({
@@ -26,11 +18,11 @@ chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) 
 			break;
 
 		case "start_loading_screen":
-			document.getElementsByClassName("loader").style.display = "block";
+			document.getElementById("loader").style.display = "block";
 			break;
 
 		case "stop_loading_screen":
-			document.getElementsByClassName("loader").style.display = "none";
+			document.getElementById("loader").style.display = "none";
 			break;
 	}
 });

@@ -14,6 +14,7 @@ const descriptions = {
 	"Forced Action":
 		"Forces a user to complete extra, unrelated tasks to do something that should be simple.",
 	"Google Ads": "Ads that are placed by Google.",
+	"Malicious URL": "URLs that are potentially harmful to the user.",
 };
 
 const checkAd = (element) => {
@@ -25,29 +26,28 @@ const checkAd = (element) => {
 	return false;
 };
 
-function scrape() {
+async function scrape() {
 	if (document.getElementById("dark_bust_count")) return;
 
 	setLoadingScreen(true);
+	const documentSegments = segments(document.body);
+	const maliciousURLCount = higlightMaliciousURLs(documentSegments);
 
 	let dp_count = 0;
 
 	// Aggregate all DOM elements on the page
-	const elements = segments(document.body).filter((element) => {
+	const elements = documentSegments.filter((element) => {
 		// Check if the element is an ad and highlight it
 		if (checkAd(element)) {
 			dp_count++;
-			highlight(element, "Google Ads", 1); // Modified this line
+			highlight(element, "Google Ads", 1);
 			return false;
 		}
 
 		return element.innerText?.trim().replace(/\t/g, " ").length > 0;
 	});
-
 	const elementTexts = elements.map((element) => element.innerText.trim().replace(/\t/g, " "));
-
-	// Send the DOM elements to the backend
-	fetch(API_ENDPOINT, {
+	const dpElements = fetch(API_ENDPOINT, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(elementTexts),
@@ -61,26 +61,62 @@ function scrape() {
 					dp_count++;
 				}
 			}
-
-			// Store number of dark patterns on the analyzed page
-			const g = document.createElement("div");
-			g.id = "dark_bust_count";
-			g.value = dp_count;
-			g.style.opacity = 0;
-			g.style.position = "fixed";
-			document.body.appendChild(g);
-			sendDarkPatternCount(g.value);
-		})
-		.catch((error) => {
-			alert(error);
-			alert(error.stack);
-		})
-		.finally(() => {
-			setLoadingScreen(false);
 		});
+
+	// Wait for the malicious URL and dark pattern checks to finish
+	const response = await Promise.all([dpElements, maliciousURLCount]);
+	dp_count += response[1];
+
+	// Store number of dark patterns on the analyzed page
+	const g = document.createElement("div");
+	g.id = "dark_bust_count";
+	g.value = dp_count;
+	g.style.opacity = 0;
+	g.style.position = "fixed";
+	document.body.appendChild(g);
+	sendDarkPatternCount(g.value);
+
+	setLoadingScreen(false);
 }
 
-function highlight(element, type, confidence) {
+// Highlights the elements with malicious URLs and returns the number of malicious URLs
+const higlightMaliciousURLs = async (elms) => {
+	let elements = elms
+		.filter((elm) => elm.src || elm.href)
+		.map((elm) => ({
+			url: elm.src || elm.href,
+			element: elm,
+		}));
+
+	const requests = elements.map((elm) => {
+		return fetch(`${API_ENDPOINT}/url_scan`, {
+			method: "POST",
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({ url: elm.url }),
+		}).then((resp) => resp.json());
+	});
+
+	const responses = await Promise.all(requests);
+	let count = 0;
+	responses.forEach((resp, i) => {
+		if (resp.unsafe) {
+			highlight(
+				elements[i].element,
+				"Malicious URL",
+				resp.risk_score,
+				resp.categories.length
+					? `This URL is possibly related to: ${resp.categories.join(", ")}`
+					: "",
+				"Risk"
+			);
+			count++;
+		}
+	});
+
+	return count;
+};
+
+function highlight(element, type, confidence, description = "", confidenceHeader = "Confidence") {
 	element.classList.add("dark_bust-highlight");
 
 	let body = document.createElement("span");
@@ -95,9 +131,9 @@ function highlight(element, type, confidence) {
 
 	let content = document.createElement("div");
 	content.classList.add("modal-content");
-	content.innerHTML = descriptions[type];
-	content.innerHTML += "\n";
-	content.innerHTML += `${(confidence * 100).toFixed(2)}% Confidence`;
+	content.innerHTML = description.length ? description : descriptions[type];
+	content.innerHTML += "<br>";
+	content.innerHTML += `${(confidence * 100).toFixed(2)}% ${confidenceHeader}`;
 	body.appendChild(content);
 
 	element.appendChild(body);
