@@ -12,6 +12,7 @@ DP_CLASSES = [
     "Urgency",
 ]
 
+
 class DPPredictionPipeline:
     def __init__(self, model_path="dp_prediction/model"):
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
@@ -37,4 +38,7 @@ class DPPredictionPipeline:
         _, predicted_label = torch.max(logits, dim=1)
         predicted_label = predicted_label.item()
 
-        return DP_CLASSES[predicted_label]
+        probabilities = torch.nn.functional.softmax(logits, dim=1)[0]
+        confidence = probabilities[predicted_label].item()
+
+        return DP_CLASSES[predicted_label], confidence

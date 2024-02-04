@@ -37,7 +37,7 @@ function scrape() {
 		// Check if the element is an ad and highlight it
 		if (checkAd(element)) {
 			dp_count++;
-			highlight(element, "Google Ads"); // Modified this line
+			highlight(element, "Google Ads", 1); // Modified this line
 			return false;
 		}
 
@@ -57,7 +57,7 @@ function scrape() {
 			for (let i = 0; i < elements.length; i++) {
 				if (elementTexts[i].length == 0) continue;
 				if (data[i].dp) {
-					highlight(elements[i], data[i].dp_class);
+					highlight(elements[i], data[i].dp_class, data[i].confidence);
 					dp_count++;
 				}
 			}
@@ -80,7 +80,7 @@ function scrape() {
 		});
 }
 
-function highlight(element, type) {
+function highlight(element, type, confidence) {
 	element.classList.add("dark_bust-highlight");
 
 	let body = document.createElement("span");
@@ -96,6 +96,8 @@ function highlight(element, type) {
 	let content = document.createElement("div");
 	content.classList.add("modal-content");
 	content.innerHTML = descriptions[type];
+	content.innerHTML += "\n";
+	content.innerHTML += `${(confidence * 100).toFixed(2)}% Confidence`;
 	body.appendChild(content);
 
 	element.appendChild(body);
