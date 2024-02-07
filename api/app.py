@@ -1,3 +1,4 @@
+import json
 from flask_cors import CORS
 from urllib.parse import urlparse
 from flask import request, jsonify
@@ -16,12 +17,12 @@ db = SQLAlchemy(app)
 class CachedDomainScan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     domain = db.Column(db.String(255), unique=True, nullable=False)
-    result = db.Column(db.String(1024), nullable=False)
+    result = db.Column(db.String(4096), nullable=False)
 
 
 class CachedPrediction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    text = db.Column(db.String(1024), unique=True)
+    text = db.Column(db.String(4096), unique=True)
     dp = db.Column(db.Integer)
     dp_class = db.Column(db.String(255), default="")
     confidence = db.Column(db.Float, default=0.0)
@@ -85,11 +86,10 @@ def url_scan():
 
         cached_scan = CachedDomainScan.query.filter_by(domain=domain).first()
         if cached_scan:
-            result = cached_scan.result
+            result = json.loads(cached_scan.result)
         else:
             result = malicious_URL_scan(url)
-
-            new_cached_scan = CachedDomainScan(domain=domain, result=result)
+            new_cached_scan = CachedDomainScan(domain=domain, result=json.dumps(result))
             db.session.add(new_cached_scan)
             db.session.commit()
 

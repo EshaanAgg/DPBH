@@ -2,7 +2,7 @@ import json
 import requests
 import urllib.parse
 
-ipQualityKey = "GQNWfzROpleQ0AXMwIMZtLTobllWgc3V"
+ipQualityKey = "bWZjrc5gAVlpmPq20zVkWVnSCsmF3dvz"
 keysToCheck = ["spamming", "malware", "phishing", "suspicious", "adult"]
 
 

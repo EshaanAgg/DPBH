@@ -1,5 +1,12 @@
 const API_ENDPOINT = "http://127.0.0.1:5000";
 
+document.addEventListener("DOMContentLoaded", function () {
+	// Load the Tesseract script from a URL into the DOM
+	const script = document.createElement("script");
+	script.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js";
+	document.head.appendChild(script);
+});
+
 const descriptions = {
 	Sneaking:
 		"Coerces users to act in ways that they would not normally act by obscuring information.",
@@ -26,12 +33,32 @@ const checkAd = (element) => {
 	return false;
 };
 
+const highlightMaliciousImages = (elements) => {
+	elements
+		.filter((elm) => elm.src)
+		.forEach((elm) => {
+			(async () => {
+				const worker = await Tesseract.createWorker();
+				const ret = await worker.recognize(ele.src);
+				const dp = await fetch(`${API_ENDPOINT}/`, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify({ text: ret.data.text }),
+				}).then((resp) => resp.json());
+				if (dp.dp) highlight(elm, dp.dp_class, dp.confidence);
+				await worker.terminate();
+			})();
+		});
+};
+
 async function scrape() {
 	if (document.getElementById("dark_bust_count")) return;
 
 	setLoadingScreen(true);
+
 	const documentSegments = segments(document.body);
 	const maliciousURLCount = higlightMaliciousURLs(documentSegments);
+	highlightMaliciousImages(documentSegments);
 
 	let dp_count = 0;
 
@@ -46,6 +73,7 @@ async function scrape() {
 
 		return element.innerText?.trim().replace(/\t/g, " ").length > 0;
 	});
+
 	const elementTexts = elements.map((element) => element.innerText.trim().replace(/\t/g, " "));
 	const dpElements = fetch(`${API_ENDPOINT}/`, {
 		method: "POST",
