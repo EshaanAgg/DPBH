@@ -47,3 +47,11 @@ def url_scan():
     except Exception as e:
         print(e)
         return jsonify({"error": str(e)}), 500
+
+
+@app.route("/report", methods=["POST"])
+def report():
+    # TODO: Implement the reporting functionality
+    data = request.get_json()
+    print(data)
+    return jsonify({"status": "Reported"})

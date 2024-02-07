@@ -1,4 +1,4 @@
-const API_ENDPOINT = "http://127.0.0.1:5000/";
+const API_ENDPOINT = "http://127.0.0.1:5000";
 
 const descriptions = {
 	Sneaking:
@@ -47,7 +47,7 @@ async function scrape() {
 		return element.innerText?.trim().replace(/\t/g, " ").length > 0;
 	});
 	const elementTexts = elements.map((element) => element.innerText.trim().replace(/\t/g, " "));
-	const dpElements = fetch(API_ENDPOINT, {
+	const dpElements = fetch(`${API_ENDPOINT}/`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
 		body: JSON.stringify(elementTexts),
@@ -153,12 +153,59 @@ function setLoadingScreen(status) {
 }
 
 chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) {
-	if (request.message === "analyze_site") {
-		scrape();
-	} else if (request.message === "popup_open") {
-		let element = document.getElementById("dark_bust_count");
-		if (element) {
-			sendDarkPatternCount(element.value);
-		}
+	console.log(`[RECIEVED] [${request.message}]`);
+	switch (request.message) {
+		case "analyze_site":
+			scrape();
+			break;
+
+		case "popup_open":
+			let element = document.getElementById("dark_bust_count");
+			if (element) sendDarkPatternCount(element.value);
+			break;
+
+		case "send_report":
+			sendReport();
+			break;
 	}
+});
+
+const sendReport = () => {
+	const selectedContent = localStorage.getItem("darkBustSelectedContent");
+	if (!selectedContent) {
+		alert(
+			"You have not selected any content to report. Please select some content with your cursor and then click on the report button."
+		);
+		return;
+	}
+
+	const contentTrimmed =
+		selectedContent.length > 100 ? `${selectedContent.slice(0, 100)}...` : selectedContent;
+	const description = prompt(
+		`You want to report the following content: \n\n${contentTrimmed}\n\nPlease provide a brief description of why you think this is a dark pattern.`
+	);
+
+	if (description === null) {
+		alert("Sending the report was aborted.");
+		return;
+	}
+
+	fetch(`${API_ENDPOINT}/report`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			content: selectedContent,
+			description,
+			url: window.location.href,
+		}),
+	});
+
+	alert("Report submitted successfully. Thank you for your contribution!");
+};
+
+document.addEventListener("selectionchange", function (_event) {
+	const selectedText = window.getSelection().toString().trim();
+	if (selectedText) localStorage.setItem("darkBustSelectedContent", selectedText);
 });
