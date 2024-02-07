@@ -116,6 +116,13 @@ const higlightMaliciousURLs = async (elms) => {
 	return count;
 };
 
+/**
+ * @param {HTMLElement} element The element to highlight
+ * @param {string} type The type of dark pattern that this element has
+ * @param {number} confidence The confidence that this element is a dark pattern. Should be a number between 0 and 1
+ * @param {string} [description=""] A description of the dark pattern. If not provided, the default description for the type will be used from the global descriptions object
+ * @param {string} [confidenceHeader="Confidence"] Prefix shown before the confidence percentage
+ */
 function highlight(element, type, confidence, description = "", confidenceHeader = "Confidence") {
 	element.classList.add("dark_bust-highlight");
 
@@ -139,6 +146,7 @@ function highlight(element, type, confidence, description = "", confidenceHeader
 	element.appendChild(body);
 }
 
+// Send the number of dark patterns to the popup
 function sendDarkPatternCount(number) {
 	chrome.runtime.sendMessage({
 		message: "update_current_count",
@@ -146,12 +154,14 @@ function sendDarkPatternCount(number) {
 	});
 }
 
+// Control the loading screen on the popup
 function setLoadingScreen(status) {
 	chrome.runtime.sendMessage({
 		message: status ? "start_loading_screen" : "stop_loading_screen",
 	});
 }
 
+// Message listener for the content script
 chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) {
 	console.log(`[RECIEVED] [${request.message}]`);
 	switch (request.message) {
@@ -170,6 +180,7 @@ chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) 
 	}
 });
 
+// Asks the user for information about the dark pattern that he/she wants to report and sends it to the server
 const sendReport = () => {
 	const selectedContent = localStorage.getItem("darkBustSelectedContent");
 	if (!selectedContent) {
@@ -205,6 +216,8 @@ const sendReport = () => {
 	alert("Report submitted successfully. Thank you for your contribution!");
 };
 
+// Listen for selection changes and store the selected content in
+// the local storage, so that the same can be accessed by the `sendReport` function
 document.addEventListener("selectionchange", function (_event) {
 	const selectedText = window.getSelection().toString().trim();
 	if (selectedText) localStorage.setItem("darkBustSelectedContent", selectedText);
