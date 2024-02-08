@@ -127,14 +127,12 @@ const higlightMaliciousURLs = async (elms) => {
 	const responses = await Promise.all(requests);
 	let count = 0;
 	responses.forEach((resp, i) => {
-		if (resp.unsafe) {
+		if (resp.malicious) {
 			highlight(
 				elements[i].element,
 				"Malicious URL",
-				resp.risk_score,
-				resp.categories.length
-					? `This URL is possibly related to: ${resp.categories.join(", ")}`
-					: "",
+				1,
+				`The URL was found to be reported as malicious. The verification for the same was last done on ${resp.verification_time}.`,
 				"Risk"
 			);
 			count++;
@@ -208,7 +206,7 @@ chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) 
 
 		case "send_review":
 			sendReview();
-			break;		
+			break;
 	}
 });
 
@@ -249,7 +247,7 @@ const sendReport = () => {
 };
 
 // Asks the user for information about the dark pattern that he/she wants to report and sends it to the server
-const sendReview = async() => {
+const sendReview = async () => {
 	const selectedContent = localStorage.getItem("darkBustSelectedContent");
 	if (!selectedContent) {
 		alert(
@@ -260,9 +258,7 @@ const sendReview = async() => {
 
 	const contentTrimmed =
 		selectedContent.length > 100 ? `${selectedContent.slice(0, 100)}...` : selectedContent;
-	const description = prompt(
-		`You want to review the following content: \n\n${contentTrimmed}\n\n`
-	);
+	const description = prompt(`You want to review the following content: \n\n${contentTrimmed}\n\n`);
 
 	if (description === null) {
 		alert("Sending the review was aborted.");

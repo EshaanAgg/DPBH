@@ -1,31 +1,25 @@
-import json
-import requests
-import urllib.parse
+import os
 import pandas as pd
+from datetime import datetime
+from urllib.parse import urlparse
 
-ipQualityKey = "bWZjrc5gAVlpmPq20zVkWVnSCsmF3dvz"
-keysToCheck = ["spamming", "malware", "phishing", "suspicious", "adult"]
-malicious_url_csv_file = 'api/malicious_urls.csv'
-
-def malicious_URL_scan(url, vars={}):
-    url = "https://www.ipqualityscore.com/api/json/url/%s/%s" % (
-        ipQualityKey,
-        urllib.parse.quote_plus(url),
-    )
-    x = requests.get(url, params=vars)
-    data = json.loads(x.text)
-
-    presentCategories = [key for key in keysToCheck if data[key]]
-
-    return {
-        "unsafe": data["unsafe"],
-        "risk_score": data["risk_score"],
-        "categories": presentCategories,
-    }
+file_path = os.path.dirname(os.path.abspath(__file__))
+malicious_url_csv_file = os.path.join(file_path, "../data/malicious_urls.csv")
 
 
-def check_urls_in_csv(urls_to_check):
+# Save the malicious URLs to the database
+def init_domain_scan_database(domain_scan_db, db):
     df = pd.read_csv(malicious_url_csv_file)
-    url_column = df['url']
-    result_list = [1 if url in url_column.values else 0 for url in urls_to_check]
-    return result_list
+    datetime_format = "%Y-%m-%dT%H:%M:%S%z"
+
+    for _, row in df.iterrows():
+        domain = urlparse(row["url"]).netloc
+        verification_time = datetime.strptime(row["verification_time"], datetime_format)
+
+        existing_domain = domain_scan_db.query.filter_by(domain=domain).first()
+        if not existing_domain:
+            new_domain = domain_scan_db(
+                domain=domain, verification_time=verification_time
+            )
+            db.session.add(new_domain)
+            db.session.commit()

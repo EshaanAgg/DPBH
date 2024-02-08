@@ -1,9 +1,8 @@
-import json
 import requests
 from flask_cors import CORS
 from urllib.parse import urlparse
 from flask import request, jsonify
-from utils import malicious_URL_scan
+from utils import init_domain_scan_database
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, jsonify
 from dp_prediction import DPPredictionPipeline
@@ -17,8 +16,8 @@ db = SQLAlchemy(app)
 
 class CachedDomainScan(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    domain = db.Column(db.String(255), unique=True, nullable=False)
-    result = db.Column(db.String(4096), nullable=False)
+    domain = db.Column(db.String(1024), unique=True, nullable=False)
+    verification_time = db.Column(db.DateTime, default=db.func.now())
 
 
 class CachedPrediction(db.Model):
@@ -31,6 +30,9 @@ class CachedPrediction(db.Model):
 
 with app.app_context():
     db.create_all()
+    print("[MALICIOUS URL DB] Initializing the database")
+    init_domain_scan_database(CachedDomainScan, db)
+    print("[MALICIOUS URL DB] Database initialized")
 
 
 @app.route("/", methods=["POST"])
@@ -85,16 +87,18 @@ def url_scan():
         url = request.get_json()["url"]
         domain = urlparse(url).netloc
 
-        cached_scan = CachedDomainScan.query.filter_by(domain=domain).first()
-        if cached_scan:
-            result = json.loads(cached_scan.result)
+        cached_domain_scan = CachedDomainScan.query.filter_by(domain=domain).first()
+        if cached_domain_scan:
+            return jsonify(
+                {
+                    "malicious": True,
+                    "domain": cached_domain_scan.domain,
+                    "verification_time": cached_domain_scan.verification_time,
+                }
+            )
         else:
-            result = malicious_URL_scan(url)
-            new_cached_scan = CachedDomainScan(domain=domain, result=json.dumps(result))
-            db.session.add(new_cached_scan)
-            db.session.commit()
-
-        return jsonify(result)
+            # There is no information about the domain in the cache, so return False to prevent false positives
+            return jsonify({"malicious": False})
 
     except Exception as e:
         print(e)
@@ -107,6 +111,7 @@ def report():
     data = request.get_json()
     print(data)
     return jsonify({"status": "Reported"})
+
 
 @app.route("/review", methods=["POST"])
 def review():
