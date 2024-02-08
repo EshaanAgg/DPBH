@@ -1,4 +1,5 @@
 import json
+import requests
 from flask_cors import CORS
 from urllib.parse import urlparse
 from flask import request, jsonify
@@ -106,3 +107,16 @@ def report():
     data = request.get_json()
     print(data)
     return jsonify({"status": "Reported"})
+
+@app.route("/review", methods=["POST"])
+def review():
+    review = request.get_json()
+    content = review["content"]
+    response = requests.post(
+        "https://api.sapling.ai/api/v1/aidetect",
+        json={"key": "4KUJMMC886VPWQMQUOW2MRNEZLX0REFQ", "text": content},
+    )
+    response_Dict = response.json()
+    score = response_Dict["score"]
+
+    return jsonify({"score": round(score * 100, 2)})

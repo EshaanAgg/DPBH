@@ -9,6 +9,12 @@ window.onload = function () {
 			chrome.tabs.sendMessage(tabs[0].id, { message: "send_report" });
 		});
 	};
+
+	document.getElementById("checkFakeReview").onclick = function () {
+		chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+			chrome.tabs.sendMessage(tabs[0].id, { message: "send_review" });
+		});
+	};
 };
 
 chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) {

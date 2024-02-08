@@ -205,6 +205,10 @@ chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) 
 		case "send_report":
 			sendReport();
 			break;
+
+		case "send_review":
+			sendReview();
+			break;		
 	}
 });
 
@@ -242,6 +246,42 @@ const sendReport = () => {
 	});
 
 	alert("Report submitted successfully. Thank you for your contribution!");
+};
+
+// Asks the user for information about the dark pattern that he/she wants to report and sends it to the server
+const sendReview = async() => {
+	const selectedContent = localStorage.getItem("darkBustSelectedContent");
+	if (!selectedContent) {
+		alert(
+			"You have not selected any content to review. Please select some content with your cursor and then click on the review button."
+		);
+		return;
+	}
+
+	const contentTrimmed =
+		selectedContent.length > 100 ? `${selectedContent.slice(0, 100)}...` : selectedContent;
+	const description = prompt(
+		`You want to review the following content: \n\n${contentTrimmed}\n\n`
+	);
+
+	if (description === null) {
+		alert("Sending the review was aborted.");
+		return;
+	}
+	console.log(selectedContent);
+	const response = await fetch(`${API_ENDPOINT}/review`, {
+		method: "POST",
+		headers: {
+			"Content-Type": "application/json",
+		},
+		body: JSON.stringify({
+			content: selectedContent,
+		}),
+	});
+
+	const data = await response.json();
+	const score = data.score;
+	alert(`Review submitted successfully. The content was rated as ${score}`);
 };
 
 // Listen for selection changes and store the selected content in
