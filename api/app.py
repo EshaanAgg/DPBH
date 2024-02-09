@@ -2,10 +2,10 @@ import requests
 from flask_cors import CORS
 from urllib.parse import urlparse
 from flask import request, jsonify
-from utils import init_domain_scan_database
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, jsonify
 from dp_prediction import DPPredictionPipeline
+from utils import init_domain_scan_database, translate_to_english
 
 
 app = Flask(__name__)
@@ -43,6 +43,7 @@ def detect_and_classify():
         predictions = []
 
         for text in texts:
+            text = translate_to_english(text)
             cached_prediction = CachedPrediction.query.filter_by(text=text).first()
 
             if cached_prediction:
