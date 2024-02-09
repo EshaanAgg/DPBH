@@ -43,8 +43,12 @@ const highlightMaliciousImages = (elements) => {
 				const dp = await fetch(`${API_ENDPOINT}/`, {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
-					body: JSON.stringify({ text: ret.data.text }),
-				}).then((resp) => resp.json());
+					body: JSON.stringify({
+						site_visited: window.location.href,
+						texts: [ret.data.text],
+					}),
+				}).then((resp) => resp.json()[0]);
+
 				if (dp.dp) highlight(elm, dp.dp_class, dp.confidence);
 				await worker.terminate();
 			})();
@@ -78,7 +82,10 @@ async function scrape() {
 	const dpElements = fetch(`${API_ENDPOINT}/`, {
 		method: "POST",
 		headers: { "Content-Type": "application/json" },
-		body: JSON.stringify(elementTexts),
+		body: JSON.stringify({
+			site_visited: window.location.href,
+			texts: elementTexts,
+		}),
 	})
 		.then((resp) => resp.json())
 		.then((data) => {
@@ -120,7 +127,10 @@ const higlightMaliciousURLs = async (elms) => {
 		return fetch(`${API_ENDPOINT}/url_scan`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
-			body: JSON.stringify({ url: elm.url }),
+			body: JSON.stringify({
+				site_visited: window.location.href,
+				url: elm.url,
+			}),
 		}).then((resp) => resp.json());
 	});
 

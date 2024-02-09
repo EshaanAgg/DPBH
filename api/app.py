@@ -1,11 +1,16 @@
+import json
 import requests
 from flask_cors import CORS
 from urllib.parse import urlparse
-from flask import request, jsonify
+from flask import render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, jsonify
 from dp_prediction import DPPredictionPipeline
-from utils import init_domain_scan_database, translate_to_english
+from utils import (
+    init_domain_scan_database,
+    translate_to_english,
+    convert_to_classification_data,
+)
 
 
 app = Flask(__name__)
@@ -28,6 +33,31 @@ class CachedPrediction(db.Model):
     confidence = db.Column(db.Float, default=0.0)
 
 
+class Visits(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    url = db.Column(db.String(1024), nullable=False)
+    classification_data = db.Column(db.Text, nullable=True)
+    visits = db.Column(db.Integer, default=1)
+
+    # Define a custom function to update the count of the classification data
+    def set_classification_data(self, data):
+        if self.classification_data:
+            existing_data = json.loads(self.classification_data)
+            for key, value in data.items():
+                if key in existing_data:
+                    existing_data[key] += value
+                else:
+                    existing_data[key] = value
+            self.classification_data = json.dumps(existing_data)
+        else:
+            self.classification_data = json.dumps(data)
+
+    def get_classification_data(self):
+        return (
+            json.loads(self.classification_data) if self.classification_data else None
+        )
+
+
 with app.app_context():
     db.create_all()
     print("[MALICIOUS URL DB] Initializing the database")
@@ -38,7 +68,10 @@ with app.app_context():
 @app.route("/", methods=["POST"])
 def detect_and_classify():
     try:
-        texts = request.get_json()
+        body = request.get_json()
+        texts = body["texts"]
+        site_visited = urlparse(body["site_visited"]).netloc
+
         dp_predictor = DPPredictionPipeline()
         predictions = []
 
@@ -69,6 +102,18 @@ def detect_and_classify():
                         {"dp": 1, "dp_class": prediction, "confidence": confidence}
                     )
 
+        # Set the classification data for the site visited
+        visit = Visits.query.filter_by(url=site_visited).first()
+        if visit:
+            visit.set_classification_data(convert_to_classification_data(predictions))
+            visit.visits += 1
+        else:
+            new_visit = Visits(url=site_visited)
+            new_visit.set_classification_data(
+                convert_to_classification_data(predictions)
+            )
+            db.session.add(new_visit)
+
         db.session.commit()
         return jsonify(predictions)
 
@@ -86,20 +131,33 @@ def index():
 def url_scan():
     try:
         url = request.get_json()["url"]
+        site_visited = urlparse(request.get_json()["site_visited"]).netloc
         domain = urlparse(url).netloc
+        response = None
 
         cached_domain_scan = CachedDomainScan.query.filter_by(domain=domain).first()
         if cached_domain_scan:
-            return jsonify(
-                {
-                    "malicious": True,
-                    "domain": cached_domain_scan.domain,
-                    "verification_time": cached_domain_scan.verification_time,
-                }
-            )
+            response = {
+                "malicious": True,
+                "domain": cached_domain_scan.domain,
+                "verification_time": cached_domain_scan.verification_time,
+            }
         else:
             # There is no information about the domain in the cache, so return False to prevent false positives
-            return jsonify({"malicious": False})
+            response = {"malicious": False}
+
+        # Update the visits stats
+        visit = Visits.query.filter_by(url=site_visited).first()
+        if visit:
+            visit.set_classification_data({"Malicious URLs": 1})
+        else:
+            new_visit = Visits(url=site_visited)
+            new_visit.set_classification_data({"Malicious URLs": 1})
+            db.session.add(new_visit)
+
+        db.session.commit()
+
+        return jsonify(response)
 
     except Exception as e:
         print(e)
@@ -108,7 +166,6 @@ def url_scan():
 
 @app.route("/report", methods=["POST"])
 def report():
-    # TODO: Implement the reporting functionality
     data = request.get_json()
     print(data)
     return jsonify({"status": "Reported"})
@@ -126,3 +183,19 @@ def review():
     score = response_Dict["score"]
 
     return jsonify({"score": round(score * 100, 2)})
+
+
+@app.route("/dashboard")
+def dashboard():
+    visits = Visits.query.all()
+    data = []
+    for visit in visits:
+        data.append(
+            {
+                "url": visit.url,
+                "visits": visit.visits,
+                "classification_data": visit.get_classification_data(),
+            }
+        )
+
+    return jsonify(data)

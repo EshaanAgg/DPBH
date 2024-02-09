@@ -41,3 +41,16 @@ def translate_to_english(sentence):
     )[0]
 
     return translated_sentence
+
+
+def convert_to_classification_data(results):
+    data = {}
+
+    for result in results:
+        if result["dp"] == 1:
+            if result["dp_class"] in data:
+                data[result["dp_class"]] += 1
+            else:
+                data[result["dp_class"]] = 1
+
+    return data
