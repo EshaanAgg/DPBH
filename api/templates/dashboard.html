@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Buster</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="p-0 m-0 w-full px-4">
+    <div class="py-4">
+        <div class="px-4 flex flex-col gap-4">
+            <div class="space-y-4 text-center">
+                <h1 class="text-6xl font-bold tracking-tighter">
+                    Dark Bust
+                </h1>
+                <p class="text-gray-500 text-xl/relaxed">
+                    A cross platform browser extension that uses LLMs and UI analysis to protect users from 10+ dark
+                    patterns. Works with all the Indian languages.
+                </p>
+            </div>
+            <div class="mx-auto grid grid-cols-6 gap-4 mx-auto px-auto content-center justify-self-center">
+                {% for key, value in dp_data.items() %}
+                <div class="border border-gray-500 rounded-3xl p-2 flex flex-col justify-self-center">
+                    <div class="text-md font-medium tracking-tight pb-0.5 pl-1">
+                        {{key}}
+                    </div>
+                    <p class="text-gray-500 text-xs text-right pr-1">{{value}}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <table class="min-w-full divide-y divide-gray-200 my-8 rounded-3xl border border-gray-500">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-md font-medium text-black tracking-wider">
+                        URL</th>
+                    <th scope="col" class="px-6 py-3 text-left text-md font-medium text-black tracking-wider">
+                        Visits
+                    </th>
+                    <th scope="col" class="px-6 py-3 text-left text-md font-medium text-black tracking-wider">
+                        Count of Dark Patterns Highlighted</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for entry in data %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap text-md">{{ entry.url }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-md">{{ entry.visits }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <ul>
+                            {% for key, value in entry.classification_data.items() %}
+                            <li>{{ key }}: {{ value }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

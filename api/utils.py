@@ -27,6 +27,8 @@ def init_domain_scan_database(domain_scan_db, db):
             )
             db.session.add(new_domain)
             db.session.commit()
+        else:
+            return
 
 
 def translate_to_english(sentence):

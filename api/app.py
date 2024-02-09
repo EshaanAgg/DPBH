@@ -1,6 +1,7 @@
 import json
 import requests
 from flask_cors import CORS
+from constants import dp_data
 from urllib.parse import urlparse
 from flask import render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -122,11 +123,6 @@ def detect_and_classify():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/", methods=["GET"])
-def index():
-    return "The server is up and running!"
-
-
 @app.route("/url_scan", methods=["POST"])
 def url_scan():
     try:
@@ -185,8 +181,8 @@ def review():
     return jsonify({"score": round(score * 100, 2)})
 
 
-@app.route("/dashboard")
-def dashboard():
+@app.route("/", methods=["GET"])
+def index():
     visits = Visits.query.all()
     data = []
     for visit in visits:
@@ -198,4 +194,9 @@ def dashboard():
             }
         )
 
-    return jsonify(data)
+    data.sort(key=lambda x: x["visits"], reverse=True)
+    return render_template("dashboard.html", data=data, dp_data=dp_data)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
