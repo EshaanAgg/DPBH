@@ -43,7 +43,6 @@ def detect_and_classify():
         predictions = []
 
         for text in texts:
-            text = translate_to_english(text)
             cached_prediction = CachedPrediction.query.filter_by(text=text).first()
 
             if cached_prediction:
@@ -55,7 +54,8 @@ def detect_and_classify():
                     }
                 )
             else:
-                prediction, confidence = dp_predictor.predict(text)
+                translated_text = translate_to_english(text)
+                prediction, confidence = dp_predictor.predict(translated_text)
                 if not prediction:
                     predictions.append({"dp": 0})
                     new_prediction = CachedPrediction(text=text, dp=0)
