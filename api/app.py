@@ -88,8 +88,8 @@ def detect_and_classify():
                     }
                 )
             else:
-                translated_text = translate_to_english(text)
-                prediction, confidence = dp_predictor.predict(translated_text)
+                # translated_text = translate_to_english(text)
+                prediction, confidence = dp_predictor.predict(text)
                 if not prediction:
                     predictions.append({"dp": 0})
                     new_prediction = CachedPrediction(text=text, dp=0)

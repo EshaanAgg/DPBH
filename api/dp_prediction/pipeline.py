@@ -17,7 +17,9 @@ class DPPredictionPipeline:
     def __init__(self, model_path="dp_prediction/model"):
         self.model = AutoModelForSequenceClassification.from_pretrained(model_path)
         self.tokenizer = AutoTokenizer.from_pretrained(model_path)
+        self.model.to('cuda')
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 
     def predict(self, text):
         inputs = self.tokenizer(

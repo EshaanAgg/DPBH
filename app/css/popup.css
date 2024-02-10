@@ -1,12 +1,15 @@
-html,
+html{
+	background: none;
+}
+
 body {
-	font-family: "Poppins", sans-serif;
 	font-size: 24px;
 	margin: 0;
 	min-height: 180;
 	width: 296px;
-	color: #d8d8d8;
-	background-color: #000000;
+	color: aliceblue;
+	border-radius: 10px;
+	background-color: #0c0c0c;
 }
 
 h1 {
@@ -25,9 +28,10 @@ button {
 	font-size: 16px;
 	padding: 12px 12px;
 	margin: 8px 0px 8px 0px;
-	border-radius: 3px;
-	box-shadow: 0px 3px 2px -1px #e3e3e3;
-	width: 100%;
+	font-weight: 550;
+	color: aliceblue;
+	border-radius: 6px;
+	width: 90%;
 	transition: background-color 0.2s ease;
 }
 
@@ -43,11 +47,14 @@ a:active {
 	text-decoration: none;
 }
 
+.modal-header-content {
+	padding: 16px 16px 16px 16px;
+}
 .modal-header {
 	align-items: center;
 	text-align: center;
-	box-shadow: 0px 3px 2px -1px #e3e3e3;
-	color: #d8d8d8;
+	border-bottom: aliceblue 2px solid;
+	color: aliceblue;
 	background-color: #000000;
 	padding: 3px;
 }
@@ -63,12 +70,11 @@ a:active {
 }
 
 .container {
-	color: #d8d8d8;
-	background-color: #000000;
+	color: aliceblue;
+	background-color: #0c0c0c;
 	margin: 8px 0px 8px 0px;
 	padding: 6px 14px 6px 14px;
-	border-radius: 3px;
-	box-shadow: 0px 3px 2px -1px #e3e3e3;
+	border-radius: 10px;
 }
 
 .container p {
@@ -76,19 +82,19 @@ a:active {
 }
 
 .label {
-	color: #d8d8d8;
+	color: aliceblue;
 	margin: 0px;
-	font-weight: 150;
+	font-weight: 600;
 }
 
 .number,
 .total-number {
-	color: #d8d8d8;
+	color: aliceblue;
 	font-size: 32px;
 }
 
 .modal-footer a {
-	color: #d8d8d8;
+	color: aliceblue;
 }
 
 .loader {
