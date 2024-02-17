@@ -61,8 +61,7 @@ async function scrape() {
 	setLoadingScreen(true);
 
 	const documentSegments = segments(document.body);
-	const maliciousURLCount = higlightMaliciousURLs(documentSegments);
-	highlightMaliciousImages(documentSegments);
+	const maliciousURLCount = 0;
 
 	let dp_count = 0;
 
