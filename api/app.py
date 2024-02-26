@@ -9,10 +9,12 @@ from flask import Flask, request, jsonify
 from dp_prediction import DPPredictionPipeline
 from utils import (
     init_domain_scan_database,
-    translate_to_english,
     convert_to_classification_data,
 )
+from translation_unit import get_translated_text
+from IndicLID import IndicLID
 
+IndicLID_model = IndicLID(input_threshold=0.5, roman_lid_threshold=0.6)
 
 app = Flask(__name__)
 CORS(app)
@@ -88,8 +90,8 @@ def detect_and_classify():
                     }
                 )
             else:
-                # translated_text = translate_to_english(text)
-                prediction, confidence = dp_predictor.predict(text)
+                translated_text = get_translated_text(text, IndicLID_model)
+                prediction, confidence = dp_predictor.predict(translated_text)
                 if not prediction:
                     predictions.append({"dp": 0})
                     new_prediction = CachedPrediction(text=text, dp=0)
