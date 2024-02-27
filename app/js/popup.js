@@ -1,8 +1,14 @@
 window.onload = function () {
-	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
-		chrome.tabs.sendMessage(tabs[0].id, { message: "popup_open" });
-		chrome.tabs.sendMessage(tabs[0].id, { message: "analyze_site" });
-	});
+	if (localStorage.getItem("DarkBustConsent")) {
+		acceptConsent();
+	} else {
+		document.getElementById("acceptButton").onclick = function () {
+			acceptConsent();
+		};
+		document.getElementById("declineButton").onclick = function () {
+			window.close();
+		};
+	}
 
 	document.getElementById("submitReport").onclick = function () {
 		chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
@@ -17,14 +23,25 @@ window.onload = function () {
 	};
 };
 
+function acceptConsent() {
+	localStorage.setItem("DarkBustConsent", "true");
+	chrome.tabs.query({ currentWindow: true, active: true }, function (tabs) {
+		chrome.tabs.sendMessage(tabs[0].id, { message: "popup_open" });
+		chrome.tabs.sendMessage(tabs[0].id, { message: "analyze_site" });
+	});
+	document.getElementById("consent-form").style.display = "none";
+	document.getElementById("modal-content").style.display = "block";
+	document.getElementById("helper-btns").style.display = "block";
+}
+
 chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) {
 	console.log(`[RECIEVED] [${request.message}]`);
 	switch (request.message) {
 		case "update_current_count":
 			const countArray = [];
 			for (const key in request.count) {
-			const value = request.count[key];
-			countArray.push([key, value]);
+				const value = request.count[key];
+				countArray.push([key, value]);
 			}
 			console.log(countArray);
 			document.getElementsByClassName("number")[0].textContent = countArray[0][1];
@@ -53,22 +70,19 @@ chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) 
 		case "stop_loading_screen":
 			document.getElementById("loader").style.display = "none";
 			break;
-			
+
 		case "update_selection":
 			localStorage.setItem("darkBustSelectedContent", request.content);
 			break;
 	}
 
 	function setBarWidth(dataElement, barElement, cssProperty, barPercent) {
-		var listData = Array.from(document.querySelectorAll(dataElement)).map(function(element) {
+		var listData = Array.from(document.querySelectorAll(dataElement)).map(function (element) {
 			return element.innerHTML;
 		});
 		var listMax = Math.max(...listData);
-		Array.from(document.querySelectorAll(barElement)).forEach(function(element, index) {
+		Array.from(document.querySelectorAll(barElement)).forEach(function (element, index) {
 			element.style[cssProperty] = (listData[index] / listMax) * barPercent + "%";
 		});
 	}
 });
-
-
-

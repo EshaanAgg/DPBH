@@ -59,6 +59,10 @@ a:active {
 	padding: 3px;
 }
 
+.btn {
+	cursor: pointer;
+}
+
 .modal-content {
 	padding: 0px 16px 0px 16px;
 }
