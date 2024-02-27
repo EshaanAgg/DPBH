@@ -20,6 +20,19 @@
                     patterns. Works with all the Indian languages.
                 </p>
             </div>
+
+            <div class="px-16 m-2 text-md text-center">
+                We abide by <b>India’s Digital Personal Data Protection (DPDP) Act</b> and thus no collect no
+                information
+                about you.
+                <br>
+                <div class="text-xs">
+                    All the text visible on your screen is scraped and maybe passed through our backend pipeline for
+                    detection, but the same information can't be linked to you in any manner. All your personal data is
+                    never
+                    stored or processed by us.</div>
+            </div>
+
             <div class="mx-auto grid grid-cols-6 gap-4 mx-auto px-auto content-center justify-self-center">
                 {% for key, value in dp_data.items() %}
                 <div class="border border-gray-500 rounded-3xl p-2 flex flex-col justify-self-center">
@@ -31,6 +44,7 @@
                 {% endfor %}
             </div>
         </div>
+
 
         <table class="min-w-full divide-y divide-gray-200 my-8 rounded-3xl border border-gray-500">
             <thead class="bg-gray-50">
