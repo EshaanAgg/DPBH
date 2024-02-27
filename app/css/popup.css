@@ -106,7 +106,43 @@ a:active {
 	display: inline-block;
 	-webkit-animation: rotation 1s linear infinite;
 	animation: rotation 1s linear infinite;
+	align-self: center;
+	margin: 0 auto; /* Add this line */
+	margin-top: 20px;
+	margin-bottom: 20px;
 }
+
+.style-1 {
+	list-style-type: none;
+	padding: 0;
+	li {
+	  /* font-weight: bold; */
+	  color: white;
+	  width: 250px;
+	  background: #191919;
+	  margin-bottom: 8px/2;
+	  border-radius: 8px/4;
+	  /* height: 20px; */
+	}
+	em {
+	  font-style: normal;
+	  display: inline-block;
+	  background: #a81f25;
+	  width: 85px;
+	  padding-top: 8px;
+	  padding-left: 8px;
+	  padding-bottom: 8px;
+	  padding-right: 8px;
+	  border-radius: 8px/4;
+	  animation: grow-padding-right 1s;
+	  font-size: small;
+	}
+	span {
+	  float: right;
+	  padding: 8px;
+	  font-size: small;
+	}
+  }
 
 @-webkit-keyframes rotation {
 	to {
