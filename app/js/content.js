@@ -63,13 +63,25 @@ async function scrape() {
 	const documentSegments = segments(document.body);
 	const maliciousURLCount = 0;
 
-	let dp_count = 0;
+	let dp_count = new Map([
+		["Sneaking", 0],
+		["Urgency", 0],
+		["Misdirection", 0],
+		["Social Proof", 0],
+		["Scarcity", 0],
+		["Obstruction", 0],
+		["Forced Action", 0],
+		["Google Ads", 0],
+		["Malicious URL", 0],
+		["Total", 0]
+	]);
 
 	// Aggregate all DOM elements on the page
 	const elements = documentSegments.filter((element) => {
 		// Check if the element is an ad and highlight it
 		if (checkAd(element)) {
-			dp_count++;
+			dp_count.set("Google Ads", dp_count.get("Google Ads") + 1);
+			dp_count.set("Total", dp_count.get("Total") + 1);
 			highlight(element, "Google Ads", 1);
 			return false;
 		}
@@ -92,23 +104,25 @@ async function scrape() {
 				if (elementTexts[i].length == 0) continue;
 				if (data[i].dp) {
 					highlight(elements[i], data[i].dp_class, data[i].confidence);
-					dp_count++;
+					dp_count.set(data[i].dp_class, dp_count.get(data[i].dp_class) + 1);
+					dp_count.set("Total", dp_count.get("Total") + 1);
 				}
 			}
 		});
 
 	// Wait for the malicious URL and dark pattern checks to finish
 	const response = await Promise.all([dpElements, maliciousURLCount]);
-	dp_count += response[1];
+	dp_count.set("Malicious URL", dp_count.get("Malicious URL") + response[1]);
+	dp_count.set("Total", dp_count.get("Total") + response[1]);
 
 	// Store number of dark patterns on the analyzed page
-	const g = document.createElement("div");
-	g.id = "dark_bust_count";
-	g.value = dp_count;
-	g.style.opacity = 0;
-	g.style.position = "fixed";
-	document.body.appendChild(g);
-	sendDarkPatternCount(g.value);
+	// const g = document.createElement("div");
+	// g.id = "dark_bust_count";
+	// g.value = JSON.stringify({ ...dp_count });
+	// g.style.opacity = 0;
+	// g.style.position = "fixed";
+	// document.body.appendChild(g);
+	sendDarkPatterns(dp_count);
 
 	setLoadingScreen(false);
 }
@@ -182,10 +196,16 @@ function highlight(element, type, confidence, description = "", confidenceHeader
 }
 
 // Send the number of dark patterns to the popup
-function sendDarkPatternCount(number) {
+function sendDarkPatterns(patterns) {
+	patterns = new Map([...patterns.entries()].sort((a, b) => b[1] - a[1]));
+
+	// Trim patterns to top 5 elements
+	patterns = new Map([...patterns.entries()].slice(0, 6));
+	const patternsObj = Object.fromEntries(patterns);
+	
 	chrome.runtime.sendMessage({
 		message: "update_current_count",
-		count: number,
+		count: patternsObj,
 	});
 }
 
@@ -206,7 +226,7 @@ chrome.runtime.onMessage.addListener(function (request, _sender, _sendResponse) 
 
 		case "popup_open":
 			let element = document.getElementById("dark_bust_count");
-			if (element) sendDarkPatternCount(element.value);
+			if (element) sendDarkPatterns(element.value);
 			break;
 
 		case "send_report":
