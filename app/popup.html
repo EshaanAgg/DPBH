@@ -1,63 +1,82 @@
 <!DOCTYPE html>
 <html lang="en">
+	<head>
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins&display=swap" />
+		<link rel="stylesheet" href="css/popup.css" type="text/css" />
 
-<head>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins&display=swap">
-    <link rel="stylesheet" href="css/popup.css" type="text/css">
+		<script src="js/popup.js"></script>
+	</head>
 
-    <script src="js/popup.js"></script>
-</head>
-
-<body>
-    <div class="pad">
-
-        <div class="modal-header">
-            <div class="modal-header-content">
-                <img src="icons/DPBH Logo.png" alt="" width="36" height="36"
-                    style="display: inline-block; vertical-align: middle;">
-                <h1 style="display: inline-block; vertical-align: middle; margin-left: 10px; text-align: center;">Dark
-                    Buster</h1>
-            </div>
-
-        </div>
-        <div class="modal-content">
-            <section><span class="loader" id="loader"></span></section>
-            <div class="container">
-                <p class="label">Dark Patterns</p>
-                <p class="number">n/a</p>
-            </div>
-            <section>
-                <ul class="style-1">
-                  <li class="dp1">
-                    <em>Google Ads</em>
-                    <span>0</span>
-                  </li>
-                  <li class="dp2">
-                    <em>Sneaking</em>
-                    <span>0</span>
-                  </li>
-                  <li class="dp3">
-                    <em>Scarcity</em>
-                    <span>0</span>
-                  </li>
-                  <li class="dp4">
-                    <em>Misdirection</em>
-                    <span>0</span>
-                  </li>
-                  <li class="dp5">
-                    <em>Social Proof</em>
-                    <span>0</span>
-                  </li>
-                </ul>
-              </section>
-        </div>
-        <center>
-            <button class="modal-button" id="checkFakeReview">Check for a Fake Review</button>
-            <button class="modal-button" id="submitReport">Report a Dark Pattern</button>
-        </center>
-    </div>
-
-
-</body>
-
+	<body>
+		<div class="pad">
+			<div class="modal-header">
+				<div class="modal-header-content">
+					<img
+						src="icons/DPBH Logo.png"
+						alt=""
+						width="36"
+						height="36"
+						style="display: inline-block; vertical-align: middle" />
+					<h1
+						style="
+							display: inline-block;
+							vertical-align: middle;
+							margin-left: 10px;
+							text-align: center;
+						">
+						Dark Buster
+					</h1>
+				</div>
+				<div class="modal-content" id="consent-form">
+					<p style="text-align: left;">
+						By using our extension, you are allowing us to read the website pages which you will be
+						visiting.
+					</p>
+					<p style="text-align: left;">
+						Please note that your personal or sensitive information will never be processed or saved
+						at any point.
+					</p>
+					<button id="acceptButton" class="btn">Accept</button>
+					<button id="declineButton" class="btn">Decline</button>
+				</div>
+			</div>
+			<div class="modal-content" id="modal-content" style="display: none">
+				<section><span class="loader" id="loader"></span></section>
+				<div class="container">
+					<p class="label">Dark Patterns</p>
+					<p class="number">n/a</p>
+				</div>
+				<section>
+					<ul class="style-1">
+						<li class="dp1">
+							<em>Google Ads</em>
+							<span>0</span>
+						</li>
+						<li class="dp2">
+							<em>Sneaking</em>
+							<span>0</span>
+						</li>
+						<li class="dp3">
+							<em>Scarcity</em>
+							<span>0</span>
+						</li>
+						<li class="dp4">
+							<em>Misdirection</em>
+							<span>0</span>
+						</li>
+						<li class="dp5">
+							<em>Social Proof</em>
+							<span>0</span>
+						</li>
+					</ul>
+				</section>
+			</div>
+			<center>
+				<div id="helper-btns" style="display: none">
+					<button class="modal-button btn" id="checkFakeReview">Check for a Fake Review</button>
+					<button class="modal-button btn" id="submitReport">Report a Dark Pattern</button>
+				</div>
+			</center>
+		</div>
+	</body>
 </html>
