@@ -1,4 +1,5 @@
 import requests
+import string
 
 available_languages = set()
 for lang in [
@@ -30,8 +31,10 @@ for lang in [
 
 def get_language_code(input_string):
     lang, _ = input_string.split("_")
-    while lang not in available_languages:
+    while lang not in available_languages and len(lang) > 0:
         lang = lang[:-1]
+    if len(lang) == 0:
+        lang = "hi"
     return lang
 
 
@@ -127,9 +130,26 @@ def translate(source_language_code, target_language_code, content):
         }
 
 
+def count_letters_and_symbols(text):
+    english_alphabets = set(string.ascii_lowercase)
+    english_count = 0
+    symbol_count = 0
+
+    for char in text.lower():
+        if char in english_alphabets:
+            english_count += 1
+        elif char in string.punctuation or char in string.digits:
+            symbol_count += 1
+
+    return english_count, symbol_count
+
+
 def is_english(text):
-    non_ascii_count = sum(1 for char in text if ord(char) > 127)
-    if non_ascii_count / len(text) < 0.05:
+    english_count, symbol_count = count_letters_and_symbols(text)
+    total_count = english_count + symbol_count
+    english_ratio = english_count / total_count if total_count > 0 else 0
+
+    if english_ratio >= 0.5:
         return True
     else:
         return False
@@ -139,6 +159,7 @@ def get_translated_text(text, IndicLID_model):
     if is_english(text):
         return text
     else:
+        text = text.replace("\n", " ")
         res = IndicLID_model.batch_predict([text], 1)
         source_language_code = get_language_code(res[0][1])
         return translate(source_language_code, "en", text)["translated_content"]

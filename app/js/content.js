@@ -73,7 +73,7 @@ async function scrape() {
 		["Forced Action", 0],
 		["Google Ads", 0],
 		["Malicious URL", 0],
-		["Total", 0]
+		["Total", 0],
 	]);
 
 	// Aggregate all DOM elements on the page
@@ -86,7 +86,8 @@ async function scrape() {
 			return false;
 		}
 
-		return element.innerText?.trim().replace(/\t/g, " ").length > 0;
+		const innerText = element.innerText?.trim().replace(/\t/g, " ");
+		return innerText.length > 0 || innerText.split(" ").length > 1;
 	});
 
 	const elementTexts = elements.map((element) => element.innerText.trim().replace(/\t/g, " "));
@@ -202,7 +203,7 @@ function sendDarkPatterns(patterns) {
 	// Trim patterns to top 5 elements
 	patterns = new Map([...patterns.entries()].slice(0, 6));
 	const patternsObj = Object.fromEntries(patterns);
-	
+
 	chrome.runtime.sendMessage({
 		message: "update_current_count",
 		count: patternsObj,

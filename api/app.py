@@ -64,7 +64,7 @@ class Visits(db.Model):
 with app.app_context():
     db.create_all()
     print("[MALICIOUS URL DB] Initializing the database")
-    init_domain_scan_database(CachedDomainScan, db)
+    # init_domain_scan_database(CachedDomainScan, db)
     print("[MALICIOUS URL DB] Database initialized")
 
 
@@ -78,9 +78,11 @@ def detect_and_classify():
         dp_predictor = DPPredictionPipeline()
         predictions = []
 
+        index = 0
         for text in texts:
+            print(f"Processing text {index + 1} of {len(texts)}")
+            index += 1
             cached_prediction = CachedPrediction.query.filter_by(text=text).first()
-
             if cached_prediction:
                 predictions.append(
                     {
@@ -92,6 +94,7 @@ def detect_and_classify():
             else:
                 translated_text = get_translated_text(text, IndicLID_model)
                 prediction, confidence = dp_predictor.predict(translated_text)
+                prediction, confidence = dp_predictor.predict(text)
                 if not prediction:
                     predictions.append({"dp": 0})
                     new_prediction = CachedPrediction(text=text, dp=0)
@@ -104,6 +107,7 @@ def detect_and_classify():
                     predictions.append(
                         {"dp": 1, "dp_class": prediction, "confidence": confidence}
                     )
+                db.session.commit()
 
         # Set the classification data for the site visited
         visit = Visits.query.filter_by(url=site_visited).first()
@@ -116,8 +120,8 @@ def detect_and_classify():
                 convert_to_classification_data(predictions)
             )
             db.session.add(new_visit)
+            db.session.commit()
 
-        db.session.commit()
         return jsonify(predictions)
 
     except Exception as e:
@@ -152,7 +156,6 @@ def url_scan():
             new_visit = Visits(url=site_visited)
             new_visit.set_classification_data({"Malicious URLs": 1})
             db.session.add(new_visit)
-
         db.session.commit()
 
         return jsonify(response)
