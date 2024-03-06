@@ -13,4 +13,4 @@ rm -rf indiclid-bert.zip indiclid-ftn.zip indiclid-ftr.zip
 # Download our model
 gdown https://drive.google.com/file/d/1lc0G_kLXCR-Q_rOb9EjCU8y4ryI2ZNgE/view\?usp\=drive_link --fuzzy
 unzip dp_prediction.zip -d dp_prediction/model
-RUN rm -rf dp_prediction.zip
+rm -rf dp_prediction.zip
