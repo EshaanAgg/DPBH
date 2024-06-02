@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask import Flask, request, jsonify
 from dp_prediction import DPPredictionPipeline
 from utils import (
-    init_domain_scan_database,
+    # init_domain_scan_database,
     convert_to_classification_data,
 )
 from translation_unit import get_translated_text
@@ -63,9 +63,7 @@ class Visits(db.Model):
 
 with app.app_context():
     db.create_all()
-    print("[MALICIOUS URL DB] Initializing the database")
     # init_domain_scan_database(CachedDomainScan, db)
-    print("[MALICIOUS URL DB] Database initialized")
 
 
 @app.route("/", methods=["POST"])
