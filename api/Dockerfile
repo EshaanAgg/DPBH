@@ -22,5 +22,5 @@ RUN gdown https://drive.google.com/file/d/1lc0G_kLXCR-Q_rOb9EjCU8y4ryI2ZNgE/view
 RUN unzip dp_prediction.zip -d dp_prediction/model
 RUN rm -rf dp_prediction.zip
 
-EXPOSE 3000
+EXPOSE 5000
 CMD ["python", "app.py"]
