@@ -1,5 +1,5 @@
 .dark_bust-highlight {
-	position: relative;
+	position: absolute;
 	background-color: red;
 	animation: flicker 0.5s linear infinite alternate;
 }
@@ -8,18 +8,19 @@
 	font-size: 12px;
 	font-weight: 150;
 	margin: 0;
-	width: 200px;
+	width: 150px;
 	color: aliceblue;
 	background-color: #000000;
 	position: absolute;
 	z-index: 999;
-	bottom: 125%;
 	left: 50%;
-	margin-left: -100px;
+	transform: translateX(-50%);
 	visibility: hidden;
+	z-index: 1000;
 	opacity: 0;
 	transition: opacity 0.3s ease;
 	border-radius: 10px;
+	height: 175px;
 }
 
 .dark_bust-highlight-body .modal-header {

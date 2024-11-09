@@ -87,7 +87,7 @@ async function scrape() {
 		}
 
 		const innerText = element.innerText?.trim().replace(/\t/g, " ");
-		return innerText.length > 0 || innerText.split(" ").length > 1;
+		return innerText && innerText.length > 0 || innerText.split(" ").length > 1;
 	});
 
 	const elementTexts = elements.map((element) => element.innerText.trim().replace(/\t/g, " "));
@@ -103,7 +103,7 @@ async function scrape() {
 		.then((data) => {
 			for (let i = 0; i < elements.length; i++) {
 				if (elementTexts[i].length == 0) continue;
-				if (data[i].dp) {
+				if (data && data[i] && data[i].dp) {
 					highlight(elements[i], data[i].dp_class, data[i].confidence);
 					dp_count.set(data[i].dp_class, dp_count.get(data[i].dp_class) + 1);
 					dp_count.set("Total", dp_count.get("Total") + 1);

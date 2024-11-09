@@ -1,6 +1,7 @@
 api/**/model
 api/**/models
 api/**/__pycache__
+**/*.zip
 
 api/myvenv
 api/.venv
